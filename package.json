@@ -4,7 +4,7 @@
   "description": "Workspace for the recaptcha-angular library",
   "private": true,
   "scripts": {
-    "build": "ng build recaptcha-angular",
+    "build": "ng build recaptcha-angular && cp README.md LICENSE dist/recaptcha-angular/",
     "test": "ng test recaptcha-angular --watch=false",
     "test:watch": "ng test recaptcha-angular",
     "test:coverage": "ng test recaptcha-angular --watch=false --code-coverage && istanbul-badges-readme",

@@ -1,6 +1,6 @@
 {
   "name": "recaptcha-angular",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Lightweight Angular reCAPTCHA v2 checkbox component with TypeScript, standalone APIs, and ControlValueAccessor (ngModel / reactive forms) support",
   "author": "Souhail Makni <maknisouhail@gmail.com>",
   "license": "MIT",
