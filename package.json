@@ -5,15 +5,16 @@
   "private": true,
   "scripts": {
     "build": "ng build recaptcha-angular",
-    "test": "ng test recaptcha-angular --watch=false --browsers=ChromeHeadless",
+    "test": "ng test recaptcha-angular --watch=false",
     "test:watch": "ng test recaptcha-angular",
+    "test:coverage": "ng test recaptcha-angular --watch=false --code-coverage && istanbul-badges-readme",
     "pack": "cd dist/recaptcha-angular && npm pack"
   },
   "engines": {
     "node": ">=20.19.0"
   },
   "devDependencies": {
-    "@angular/build": "^19.0.0",
+    "@angular-devkit/build-angular": "^19.0.0",
     "@angular/cli": "^19.0.0",
     "@angular/common": "^19.0.0",
     "@angular/compiler": "^19.0.0",
@@ -23,6 +24,7 @@
     "@angular/platform-browser": "^19.0.0",
     "@angular/platform-browser-dynamic": "^19.0.0",
     "@types/jasmine": "^5.1.0",
+    "istanbul-badges-readme": "1.9.0",
     "jasmine-core": "^5.4.0",
     "karma": "^6.4.0",
     "karma-chrome-launcher": "^3.2.0",
