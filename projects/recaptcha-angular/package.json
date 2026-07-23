@@ -1,0 +1,31 @@
+{
+  "name": "recaptcha-angular",
+  "version": "1.0.0",
+  "description": "Lightweight Angular reCAPTCHA v2 checkbox component with TypeScript, standalone APIs, and ControlValueAccessor (ngModel / reactive forms) support",
+  "author": "Souhail Makni <maknisouhail@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Souhailmakni/recaptcha-angular.git"
+  },
+  "homepage": "https://github.com/Souhailmakni/recaptcha-angular#readme",
+  "bugs": {
+    "url": "https://github.com/Souhailmakni/recaptcha-angular/issues"
+  },
+  "keywords": [
+    "angular",
+    "recaptcha",
+    "recaptcha-v2",
+    "checkbox",
+    "google-recaptcha",
+    "standalone",
+    "control-value-accessor",
+    "typescript"
+  ],
+  "peerDependencies": {
+    "@angular/common": ">=17.0.0",
+    "@angular/core": ">=17.0.0",
+    "@angular/forms": ">=17.0.0"
+  },
+  "sideEffects": false
+}
