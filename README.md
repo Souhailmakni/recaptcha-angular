@@ -1,8 +1,8 @@
 # recaptcha-angular
 
-> Lightweight, zero-dependency Angular component for **Google reCAPTCHA v2 (checkbox)**
+> Lightweight, zero-dependency Angular component for **Google reCAPTCHA v2 (checkbox) and v3 (score-based)**
 > with full TypeScript support, standalone APIs, and `ControlValueAccessor`
-> (`ngModel` / reactive forms) integration.
+> (`ngModel` / reactive forms) integration. Switch between v2 and v3 with a single `version` input.
 
 [![npm](https://img.shields.io/npm/v/recaptcha-angular)](https://www.npmjs.com/package/recaptcha-angular)
 [![license](https://img.shields.io/npm/l/recaptcha-angular)](LICENSE)
@@ -12,7 +12,7 @@ Coverage (generated locally with `npm run test:coverage`, no external service):
 
 | Statements | Branches | Functions | Lines |
 |---|---|---|---|
-| ![Statements](https://img.shields.io/badge/statements-98.31%25-brightgreen.svg?style=flat) | ![Branches](https://img.shields.io/badge/branches-90%25-brightgreen.svg?style=flat) | ![Functions](https://img.shields.io/badge/functions-93.1%25-brightgreen.svg?style=flat) | ![Lines](https://img.shields.io/badge/lines-100%25-brightgreen.svg?style=flat) |
+| ![Statements](https://img.shields.io/badge/statements-96.84%25-brightgreen.svg?style=flat) | ![Branches](https://img.shields.io/badge/branches-88.46%25-yellow.svg?style=flat) | ![Functions](https://img.shields.io/badge/functions-97.36%25-brightgreen.svg?style=flat) | ![Lines](https://img.shields.io/badge/lines-97.64%25-brightgreen.svg?style=flat) |
 
 This is the Angular port of [`recaptcha-vue`](https://github.com/Souhailmakni/recaptcha-vue). Same behaviour, Angular idioms.
 
@@ -28,6 +28,7 @@ This is the Angular port of [`recaptcha-vue`](https://github.com/Souhailmakni/re
 - [Inputs](#inputs)
 - [Outputs](#outputs)
 - [Public methods](#public-methods-via-template-ref)
+- [reCAPTCHA v3](#recaptcha-v3)
 - [Forms integration](#forms-integration)
 - [`RecaptchaService`](#recaptchaservice)
 - [Server-side verification](#server-side-verification)
@@ -39,6 +40,7 @@ This is the Angular port of [`recaptcha-vue`](https://github.com/Souhailmakni/re
 
 ## Features
 
+- **v2 and v3** in one component: `version="v2"` (default) or `version="v3"`
 - **Standalone** component (Angular 17+), no NgModule required
 - **TypeScript**: full types for inputs, outputs, and the public methods
 - **`RecaptchaService`**: signal-based `token` & `isVerified` state
@@ -152,14 +154,17 @@ this.captcha.reset()
 
 | Input | Type | Default | Description |
 |---|---|---|---|
-| `sitekey` | `string` | **required** | Your reCAPTCHA v2 site key |
-| `theme` | `'light' \| 'dark'` | `'light'` | Widget color scheme |
-| `size` | `'normal' \| 'compact'` | `'normal'` | Widget size |
-| `tabindex` | `number` | `0` | Tab index |
+| `sitekey` | `string` | **required** | Your reCAPTCHA site key |
+| `version` | `'v2' \| 'v3'` | `'v2'` | Which reCAPTCHA to use. See [reCAPTCHA v3](#recaptcha-v3) |
+| `action` | `string` | `'submit'` | **v3 only.** Default action when `execute()` is called with no argument |
+| `theme` | `'light' \| 'dark'` | `'light'` | **v2 only.** Widget color scheme |
+| `size` | `'normal' \| 'compact'` | `'normal'` | **v2 only.** Widget size |
+| `tabindex` | `number` | `0` | **v2 only.** Tab index |
 | `loadingTimeout` | `number` | `30000` | ms before `error` fires if the script never loads |
 | `language` | `string` | `''` | BCP 47 language code, e.g. `'fr'`, `'ar'` |
-| `badge` | `'bottomright' \| 'bottomleft' \| 'inline'` | `'bottomright'` | Badge position (invisible size only) |
-| `isolated` | `boolean` | `false` | Isolate widget from others on the page |
+| `badge` | `'bottomright' \| 'bottomleft' \| 'inline'` | `'bottomright'` | **v2 only.** Badge position (invisible size only) |
+| `hideBadge` | `boolean` | `false` | **v3 only.** Hide the floating badge (see the legal note in [reCAPTCHA v3](#recaptcha-v3)) |
+| `isolated` | `boolean` | `false` | **v2 only.** Isolate widget from others on the page |
 
 ---
 
@@ -185,9 +190,61 @@ sending it isn't the same as being verified.
 <button (click)="captcha.reset()">Retry</button>
 ```
 
-- `reset()` resets the widget
-- `execute()` programmatically triggers the challenge (compact / invisible)
+- `reset()` resets the widget (v2) or clears the token (v3)
+- `execute(action?)` returns `Promise<string>`. On v3 it runs the challenge for the action and resolves with the token; on v2 it triggers the challenge and resolves when the next verify fires
 - `getResponse()` returns the current token string
+
+---
+
+## reCAPTCHA v3
+
+reCAPTCHA v3 is score-based and renders **no widget**: there is nothing to click.
+Set `version="v3"` and get a token on demand by calling `execute(action)`,
+usually right before you submit. `(verify)` still fires with the token, so
+`RecaptchaService` works exactly as it does for v2.
+
+```ts
+import { Component, ViewChild } from '@angular/core'
+import { RecaptchaComponent } from 'recaptcha-angular'
+
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [RecaptchaComponent],
+  template: `
+    <form (ngSubmit)="submit()">
+      <!-- No visible widget on v3, just the floating badge -->
+      <recaptcha-v2 #captcha sitekey="YOUR_V3_SITE_KEY" version="v3"></recaptcha-v2>
+      <button type="submit">Log in</button>
+    </form>
+  `,
+})
+export class LoginComponent {
+  @ViewChild('captcha') captcha!: RecaptchaComponent
+
+  async submit() {
+    const token = await this.captcha.execute('login')
+    await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 'g-recaptcha-response': token }),
+    })
+  }
+}
+```
+
+Notes specific to v3:
+
+- **Get a fresh token per submit.** v3 tokens are single-use and expire in about
+  2 minutes, so call `execute()` at submit time, not on init.
+- **The badge and the law.** v3 shows a floating "protected by reCAPTCHA" badge.
+  You may hide it with `hideBadge`, but only if you then display the
+  [required legal text](https://developers.google.com/recaptcha/docs/faq#id-like-to-hide-the-recaptcha-badge-what-is-allowed)
+  yourself.
+- **Server-side gives you a score.** `siteverify` returns `score` (0.0 to 1.0)
+  and `action`. Reject low scores and confirm the action matches.
+- **One version per page.** Rendering a v2 and a v3 instance on the same page is
+  not supported (they share Google's single `grecaptcha` global). Pick one.
 
 ---
 

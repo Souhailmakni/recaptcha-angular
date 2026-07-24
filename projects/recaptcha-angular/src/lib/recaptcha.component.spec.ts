@@ -21,6 +21,7 @@ function installGrecaptchaMock(): MockGrecaptcha {
     reset: jasmine.createSpy('reset').and.callFake((id: number) => responses.set(id, '')),
     execute: jasmine.createSpy('execute'),
     getResponse: (id: number) => responses.get(id) ?? '',
+    ready: (cb: () => void) => cb(),
   }
   ;(window as any).grecaptcha = mock
   return mock
