@@ -5,6 +5,7 @@
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,
+    "importHelpers": false,
     "types": []
   },
   "exclude": ["**/*.spec.ts"],
